@@ -1,15 +1,39 @@
-# Lead Router Lite
+🛠 Lead Router Lite
 
-Collect → validate → score → route leads to vendors, with an audit trail.
+A lightweight lead intake + routing MVP: validate → score → route to vendor → audit log.
+Built with Next.js + Supabase, designed for B2B lead marketplaces, CRMs, and SaaS integrations.
 
-## Flow
-`/api/ingest` → validate (Zod-like) → enrich (webhook) → score → choose vendor → write audit
+✨ Features
 
-## Tables
-- leads(id, payload jsonb, score int, source text, status text, created_at)
-- routes(id, vendor text, match jsonb)
-- audits(id, lead_id, message, created_at)
+✅ Lead intake API (JSON-based)
 
-## Setup
-- Run `/sql/lead.sql` in Supabase.
-- (Optional) deploy `supabase/functions/route-lead`.
+🔍 Validation pipeline (basic checks)
+
+📊 Scoring model placeholder (extendable)
+
+🔄 Vendor routing (to orgs)
+
+📜 Audit log (Supabase table)
+
+📂 Structure
+
+/app → API routes (intake, validate, route)
+
+/lib → Supabase client utilities
+
+/sql → schema: leads, orgs, routes, logs
+
+.env.example → environment template
+
+🚀 Quickstart
+pnpm i
+cp .env.example .env.local
+pnpm dev
+
+📝 Notes
+
+This is a starter scaffold, not a full lead engine.
+
+Add your scoring model logic in /app/api/score.
+
+Extend vendor routing by populating the orgs table in Supabase.
