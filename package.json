@@ -1,0 +1,35 @@
+{
+  "name": "lead-router",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fast, reliable lead intake + routing API with validation, logging, and retries.",
+  "engines": { "node": "22.x" },
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "vercel-build": "next build"      // Vercel will use this if present
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "^3.23.8",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.2.2",
+    "rate-limiter-flexible": "^5.0.3",
+    "undici": "^6.19.8"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5",
+    "eslint": "8.57.1",
+    "eslint-config-next": "14.2.5",
+    "vitest": "^2.0.5",
+    "@types/node": "^20.11.19",
+    "@types/pino-pretty": "^10.3.5"
+  }
+}
