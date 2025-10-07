@@ -13,7 +13,6 @@ export async function GET() {
 
     return Response.json({ ok: true, data });
   } catch (err: any) {
-    // Return the error message so we can see what Resend is complaining about
     return Response.json(
       { ok: false, error: err?.message || String(err) },
       { status: 500 }
