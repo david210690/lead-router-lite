@@ -2,83 +2,53 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [to, setTo] = useState("kumar@feelivacation.com"); // default test email
-  const [subject, setSubject] = useState("Hello from Next.js + Resend");
-  const [text, setText] = useState("This is a test email sent via Resend API.");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<"idle"|"sending"|"sent"|"error">("idle");
+  const [error, setError] = useState<string>("");
 
-  async function sendEmail(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("⏳ Sending...");
+    setStatus("sending"); setError("");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const payload = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+    };
 
     try {
-      const res = await fetch("/api/test-email", {
+      const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to, subject, text }),
+        body: JSON.stringify(payload),
       });
-
       const data = await res.json();
-      if (data.ok) {
-        setStatus("✅ Email sent successfully!");
-      } else {
-        setStatus("❌ Failed: " + (data.error || "Unknown error"));
-      }
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
+      setStatus("sent");
+      form.reset();
     } catch (err: any) {
-      setStatus("⚠️ Error: " + err.message);
+      setStatus("error");
+      setError(err?.message || "Something went wrong");
     }
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="text-3xl font-bold mb-6">📧 Send Test Email</h1>
+    <main style={{ maxWidth: 560, margin: "40px auto", padding: 16 }}>
+      <h1>Lead Router — Demo</h1>
+      <p>Fill this form to send a lead email via Resend.</p>
 
-      <form
-        onSubmit={sendEmail}
-        className="w-full max-w-md bg-white shadow-md rounded-lg p-6 space-y-4"
-      >
-        <div>
-          <label className="block text-sm font-medium mb-1">To</label>
-          <input
-            type="email"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Subject</label>
-          <input
-            type="text"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Message</label>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            rows={4}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
-          Send Email
+      <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, marginTop: 16 }}>
+        <input name="name" placeholder="Your name" required />
+        <input name="email" type="email" placeholder="Your email" required />
+        <textarea name="message" placeholder="Message" required rows={5} />
+        <button type="submit" disabled={status === "sending"}>
+          {status === "sending" ? "Sending…" : "Send"}
         </button>
       </form>
 
-      <p className="mt-4 text-lg">{status}</p>
+      {status === "sent" && <p style={{ color: "green" }}>✅ Sent!</p>}
+      {status === "error" && <p style={{ color: "crimson" }}>❌ {error}</p>}
     </main>
   );
 }
