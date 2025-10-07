@@ -4,22 +4,29 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function GET() {
-  return NextResponse.json({ ok: true, message: "POST to this endpoint to send a test email." });
+  return NextResponse.json({
+    ok: true,
+    message: "POST to this endpoint to send a test email.",
+  });
 }
 
 export async function POST(req: Request) {
   try {
-    const { to, subject, text } = await req.json();
+    const { to, subject, text } = await req.json().catch(() => ({}));
 
-    const data = await resend.emails.send({
-      from: "Your Name <onboarding@resend.dev>",
-      to: to || "your@email.com", // default for testing
-      subject: subject || "Test Email",
-      text: text || "Hello world!"
+    const result = await resend.emails.send({
+      from: process.env.LEAD_EMAIL_FROM || "Lead Router <onboarding@resend.dev>",
+      to: to || process.env.LEAD_EMAIL_TO || "kumar@feelivacation.com",
+      subject: subject || "Lead Router Test",
+      text: text || "Hello! This is a test email sent via Resend + Next.js 🚀",
     });
 
-    return NextResponse.json({ ok: true, result: data });
-  } catch (err) {
-    return NextResponse.json({ ok: false, error: (err as Error).message }, { status: 500 });
+    if ((result as any)?.error) {
+      return NextResponse.json({ ok: false, error: (result as any).error }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, result }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json({ ok: false, error: err?.message || "Unknown error" }, { status: 500 });
   }
 }
