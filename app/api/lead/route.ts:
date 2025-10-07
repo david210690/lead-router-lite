@@ -1,0 +1,38 @@
+import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+// Basic payload guard (small & dependency-free)
+function isValid(body: any) {
+  if (!body || typeof body !== "object") return false;
+  if (typeof body.name !== "string") return false;
+  if (typeof body.email !== "string") return false;
+  if (typeof body.message !== "string") return false;
+  return true;
+}
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json().catch(() => null);
+    if (!isValid(body)) {
+      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+    }
+
+    const { name, email, message } = body;
+
+    const result = await resend.emails.send({
+      from: process.env.LEAD_EMAIL_FROM as string,
+      to: process.env.LEAD_EMAIL_TO as string,
+      subject: `New lead from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      // You can add reply-to if you want to reply quickly from your inbox:
+      reply_to: email,
+    });
+
+    return NextResponse.json({ ok: true, result });
+  } catch (err) {
+    console.error("Lead email error:", err);
+    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
+  }
+}
